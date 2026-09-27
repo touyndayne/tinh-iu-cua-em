@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lọ Thuốc Yêu Thương Dành Cho Anh 💊✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,500&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #ff758f;
+      --primary-dark: #c9184a;
+      --ink: #3a2e39;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #ffebf0 0%, #fbe4e8 40%, #e2eafc 100%);
+      font-family: 'Quicksand', sans-serif;
+      color: var(--ink);
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px 14px 40px;
+    }
+
+    /* Canvas cánh hoa và ánh sáng bay bổng */
+    #ambientCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .tagline {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #c9184a;
+      font-weight: 700;
+      opacity: 0.9;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 4px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 10px rgba(255, 117, 143, 0.15);
+    }
+
+    h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.35rem;
+      color: #590d22;
+      margin: 6px 0 2px;
+      text-shadow: 0 2px 12px rgba(255, 117, 143, 0.25);
+    }
+
+    .sub-guide {
+      font-size: 0.9rem;
+      color: #725d68;
+      font-weight: 600;
+      line-height: 1.4;
+      padding: 0 10px;
+    }
+
+    /* Thanh chọn tâm trạng theo bảng màu */
+    .mood-scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding: 4px 0 6px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .mood-scroll-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mood-filter-bar {
+      display: flex;
+      gap: 8px;
+      padding: 0 4px;
+      width: max-content;
+      margin: 0 auto;
+    }
+
+    .mood-chip {
+      background: rgba(255, 255, 255, 0.75);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      padding: 6px 12px;
+      border-radius: 50px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+      color: #555;
+    }
+
+    .mood-chip.active, .mood-chip:hover {
+      background: white;
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 6px 16px rgba(255, 117, 143, 0.25);
+      border-color: #ff758f;
+      color: #c9184a;
+    }
+
+    .mood-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+    }
+
+    /* =================== LỌ THỦY TINH =================== */
+    .jar-area {
+      position: relative;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .jar-stage {
+      transform-origin: bottom center;
+      transition: transform 0.2s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .jar-stage.shake-gentle {
+      animation: jarSway 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes jarSway {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(-3.5deg) translateY(-2px); }
+      40% { transform: rotate(3deg); }
+      60% { transform: rotate(-2deg); }
+      80% { transform: rotate(1deg); }
+    }
+
+    .cork-lid {
+      width: 105px;
+      height: 26px;
+      background: linear-gradient(180deg, #d4a373 0%, #bc6c25 100%);
+      border-radius: 6px 6px 3px 3px;
+      box-shadow: inset 0 -3px 5px rgba(0,0,0,0.2), 0 3px 6px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 4;
+    }
+
+    .cork-lid::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 12px;
+      width: 81px;
+      height: 6px;
+      background: #99582a;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .jar-ribbon {
+      width: 140px;
+      height: 8px;
+      background: #ff4d6d;
+      border-radius: 4px;
+      margin-top: -2px;
+      z-index: 5;
+      box-shadow: 0 2px 5px rgba(255, 77, 109, 0.35);
+      position: relative;
+    }
+
+    .jar-ribbon::after {
+      content: '🎀';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      font-size: 14px;
+    }
+
+    .jar-neck {
+      width: 135px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 3.5px solid rgba(255, 255, 255, 0.85);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      backdrop-filter: blur(5px);
+      z-index: 3;
+    }
+
+    .glass-jar {
+      width: 270px;
+      height: 350px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0.4) 100%);
+      border: 4px solid rgba(255, 255, 255, 0.9);
+      border-radius: 20px 20px 85px 85px;
+      position: relative;
+      box-shadow: 
+        inset -10px 0 25px rgba(255, 255, 255, 0.6),
+        inset 10px 0 20px rgba(255, 255, 255, 0.5),
+        inset 0 -18px 25px rgba(255, 182, 193, 0.25),
+        0 20px 45px rgba(186, 133, 151, 0.28);
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap-reverse;
+      align-content: flex-start;
+      justify-content: center;
+      padding: 24px 18px 30px;
+      gap: 11px;
+    }
+
+    .glass-reflection {
+      position: absolute;
+      top: 15px;
+      left: 14px;
+      width: 14px;
+      height: 190px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.1) 100%);
+      border-radius: 10px;
+      pointer-events: none;
+      z-index: 8;
+    }
+
+    .glass-reflection-small {
+      position: absolute;
+      top: 220px;
+      left: 14px;
+      width: 14px;
+      height: 25px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 8;
+    }
+
+    .jar-label {
+      position: absolute;
+      top: 48%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 253, 248, 0.88);
+      border: 1px dashed #d8a48f;
+      padding: 6px 14px;
+      border-radius: 10px;
+      text-align: center;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      z-index: 2;
+    }
+
+    .jar-label-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.15rem;
+      color: #9c2743;
+      font-weight: 700;
+    }
+
+    .jar-label-sub {
+      font-size: 0.65rem;
+      color: #8c737c;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* =================== VIÊN THUỐC CAPSULE =================== */
+    .capsule {
+      width: 22px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(60, 20, 35, 0.16);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 6;
+      animation: capsuleShimmer 3s ease-in-out infinite alternate;
+    }
+
+    .capsule:hover, .capsule:active {
+      transform: scale(1.22) translateY(-6px) !important;
+      z-index: 10;
+      box-shadow: 0 8px 18px rgba(255, 77, 109, 0.4);
+    }
+
+    .capsule::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 3px;
+      width: 3.5px;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .cap-top, .cap-bottom {
+      width: 100%;
+      height: 50%;
+    }
+
+    .cap-top {
+      border-radius: 12px 12px 0 0;
+    }
+
+    .cap-bottom {
+      border-radius: 0 0 12px 12px;
+    }
+
+    @keyframes capsuleShimmer {
+      0% { filter: brightness(0.98); }
+      100% { filter: brightness(1.08) drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)); }
+    }
+
+    .actions-bar {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .btn-action {
+      background: white;
+      border: 1.5px solid #ffccd5;
+      padding: 11px 28px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #9d0208;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 16px rgba(255, 117, 143, 0.2);
+      transition: all 0.25s ease;
+    }
+
+    .btn-action:hover, .btn-action:active {
+      transform: translateY(-2px) scale(1.02);
+      background: #fff0f3;
+      border-color: #ff4d6d;
+    }
+
+    /* =================== MODAL: VIÊN BAY RA & LÁ THƯ =================== */
+    .letter-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(43, 24, 33, 0.52);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .letter-modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .letter-stage {
+      position: relative;
+      width: 100%;
+      max-width: 390px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .flying-capsule-box {
+      width: 44px;
+      height: 90px;
+      position: relative;
+      margin-bottom: -30px;
+      z-index: 10;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .split-top, .split-bottom {
+      width: 44px;
+      height: 45px;
+      position: absolute;
+      transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+    }
+
+    .split-top {
+      top: 0;
+      border-radius: 22px 22px 0 0;
+    }
+
+    .split-bottom {
+      bottom: 0;
+      border-radius: 0 0 22px 22px;
+    }
+
+    .flying-capsule-box.opened .split-top {
+      transform: translateY(-28px) rotate(-18deg) scale(0.9);
+      opacity: 0.9;
+    }
+    .flying-capsule-box.opened .split-bottom {
+      transform: translateY(28px) rotate(18deg) scale(0.9);
+      opacity: 0.9;
+    }
+
+    .letter-paper {
+      width: 100%;
+      background: #fffefb;
+      background-image: 
+        radial-gradient(#f0e6df 1px, transparent 1px),
+        linear-gradient(to bottom, #fffdf8, #fdf8f2);
+      background-size: 20px 20px, 100% 100%;
+      border-radius: 22px;
+      padding: 38px 24px 24px;
+      box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(224, 195, 178, 0.4);
+      position: relative;
+      transform: scale(0.7) translateY(40px);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
+      border: 1px solid #faebd7;
+    }
+
+    .letter-paper.unfolded {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .wax-seal {
+      width: 44px;
+      height: 44px;
+      background: radial-gradient(circle at 35% 35%, #e63946, #9b111e);
+      border-radius: 50%;
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 12px rgba(155, 17, 30, 0.4), inset 0 2px 4px rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffe5ec;
+      font-size: 1.1rem;
+      border: 2px dashed rgba(255, 200, 210, 0.4);
+    }
+
+    .letter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1.5px dashed #f2d2bd;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+
+    .letter-mood-badge {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #a4133c;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .letter-date {
+      font-size: 0.76rem;
+      color: #a0828f;
+      font-style: italic;
+    }
+
+    .letter-body {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.16rem;
+      line-height: 1.75;
+      color: #382933;
+      text-align: center;
+      min-height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 4px;
+      font-style: italic;
+    }
+
+    .letter-signature {
+      margin-top: 18px;
+      text-align: right;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.5rem;
+      color: #c9184a;
+    }
+
+    .letter-footer {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .btn-fold {
+      background: linear-gradient(135deg, #ff758f, #ff4d6d);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 77, 109, 0.35);
+      transition: transform 0.2s ease;
+    }
+
+    .btn-fold:hover {
+      transform: scale(1.04);
+    }
+
+    .btn-another {
+      background: #f7ede2;
+      color: #845a6d;
+      border: 1px solid #ebd9c8;
+      padding: 10px 18px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="ambientCanvas"></canvas>
+
+  <div class="app-container">
+    
+    <header>
+      <div class="tagline">
+        <i class="fa-solid fa-heart" style="color: #ff4d6d;"></i>
+        <span>ĐƠN THUỐC ĐẶC BIỆT</span>
+      </div>
+      <h1>Lọ Thuốc Cho Anh</h1>
+      <p class="sub-guide">Hôm nay anh cảm thấy thế nào? Chạm vào lọ hoặc chọn tâm trạng để lấy một viên nhé 🤍</p>
+    </header>
+
+    <!-- Thanh 7 tâm trạng -->
+    <div class="mood-scroll-wrapper">
+      <div class="mood-filter-bar" id="moodFilterBar">
+        <button class="mood-chip active" data-mood="all">
+          <span>✨ Tất cả</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Lọ Thủy Tinh -->
+    <div class="jar-area" id="jarClickArea" title="Chạm nhẹ để lắc lọ">
+      <div class="jar-stage" id="jarStage">
+        <div class="cork-lid"></div>
+        <div class="jar-ribbon"></div>
+        <div class="jar-neck"></div>
+        
+        <div class="glass-jar" id="glassJar">
+          <div class="glass-reflection"></div>
+          <div class="glass-reflection-small"></div>
+          
+          <div class="jar-label">
+            <div class="jar-label-title">Liều Thuốc Trái Tim</div>
+            <div class="jar-label-sub">Uống khi cần em</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chỉ có 1 nút duy nhất để anh ấy bấm lấy thuốc -->
+    <div class="actions-bar">
+      <button class="btn-action" onclick="takeRandomCapsule()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Uống ngẫu nhiên 1 viên</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- MODAL: VIÊN BAY RA & MỞ LÁ THƯ -->
+  <div class="letter-modal-overlay" id="letterModal">
+    <div class="letter-stage">
+      
+      <div class="flying-capsule-box" id="flyingCapsule">
+        <div class="split-top" id="splitTop"></div>
+        <div class="split-bottom" id="splitBottom"></div>
+      </div>
+
+      <div class="letter-paper" id="letterPaper">
+        <div class="wax-seal">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+
+        <div class="letter-header">
+          <span class="letter-mood-badge" id="modalMoodBadge">
+            <span class="mood-dot" id="modalMoodDot"></span>
+            <span id="modalMoodText">Khi nhớ mình</span>
+          </span>
+          <span class="letter-date" id="modalDateStamp">Hôm nay</span>
+        </div>
+
+        <div class="letter-body" id="modalMessageText">
+          "Em luôn ở đây, ngay bên cạnh anh mà..."
+        </div>
+
+        <div class="letter-signature">
+          Yêu anh nhiều hơn hôm qua 💌
+        </div>
+
+        <div class="letter-footer">
+          <button class="btn-another" onclick="takeAnotherPill()">
+            <i class="fa-solid fa-rotate-right"></i> Viên khác
+          </button>
+          <button class="btn-fold" onclick="closeLetterModal()">
+            Đã nhận lời yêu thương ✨
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Xóa ngay trạng thái tác giả còn lưu trong máy
+    localStorage.removeItem('is_author');
+    localStorage.removeItem('love_capsule_messages');
+
+    /* ==========================================================
+       1. 7 MÀU TÂM TRẠNG THEO ĐÚNG BẢNG ẢNH CỦA BẠN
+    ========================================================== */
+    const MOOD_CONFIG = {
+      pink: {
+        id: 'pink',
+        name: 'Khi nhớ mình',
+        icon: '💗',
+        topColor: '#ff758f',
+        bottomColor: '#ffffff',
+        filterTag: 'Khi nhớ mình'
+      },
+      blue: {
+        id: 'blue',
+        name: 'Khi buồn',
+        icon: '💙',
+        topColor: '#1d3557',
+        bottomColor: '#457b9d',
+        filterTag: 'Khi buồn'
+      },
+      yellow: {
+        id: 'yellow',
+        name: 'Khi cần động lực',
+        icon: '💛',
+        topColor: '#ffb703',
+        bottomColor: '#fefae0',
+        filterTag: 'Khi cần động lực'
+      },
+      purple: {
+        id: 'purple',
+        name: 'Khi thấy cô đơn',
+        icon: '💜',
+        topColor: '#7209b7',
+        bottomColor: '#d8bbff',
+        filterTag: 'Khi thấy cô đơn'
+      },
+      red: {
+        id: 'red',
+        name: 'Khi cần một chút yêu thương',
+        icon: '❤️',
+        topColor: '#d90429',
+        bottomColor: '#ef233c',
+        filterTag: 'Khi cần một chút yêu thương'
+      },
+      white: {
+        id: 'white',
+        name: 'Khi muốn được an ủi',
+        icon: '🤍',
+        topColor: '#ffffff',
+        bottomColor: '#f1f1f1',
+        filterTag: 'Khi muốn được an ủi'
+      },
+      lightblue: {
+        id: 'lightblue',
+        name: 'Khi mất ngủ',
+        icon: '🩵',
+        topColor: '#90e0ef',
+        bottomColor: '#caf0f8',
+        filterTag: 'Khi mất ngủ'
+      }
+    };
+
+    /* ==========================================================
+       2. TOÀN BỘ CÁC BỨC THƯ CỦA BẠN DÀNH CHO ANH BÁCH
+    ========================================================== */
+    const userMessages = [
+      // Khi nhớ mình
+      { mood: 'pink', text: "Mỗi giây anh nhớ em, hãy biết rằng em cũng đang nghĩ về anh gấp đôi như thế đó!" },
+      { mood: 'pink', text: "Nhắm mắt lại 3 giây xem... Em vừa gửi một nụ hôn lướt qua má anh rồi đấy!" },
+      { mood: 'pink', text: "Dù chúng mình không ở cạnh nhau ngay lúc này, tim em lúc nào cũng hướng về anh." },
+      { mood: 'pink', text: "Yêu ơi, nay em cũng nhớ yêu nhiều lắm. Ôm yêu một cái thật chặt nhé!" },
+      { mood: 'pink', text: "Bắt quả tang Bách nhớ em nhé, nhắn tin liền cho em nào!" },
+
+      // Khi buồn
+      { mood: 'blue', text: "Hôm nay nếu có chuyện làm anh buồn lòng, cứ thở một hơi thật sâu. Có em ở đây lắng nghe anh mà." },
+      { mood: 'blue', text: "Cho phép bản thân được nghỉ ngơi một chút anh nhé. Mây mù rồi cũng sẽ nhường chỗ cho nắng mai thôi." },
+      { mood: 'blue', text: "Em không thể thay anh gánh hết mệt nhọc, nhưng em hứa sẽ luôn là chốn bình yên đón anh về." },
+      { mood: 'blue', text: "Nay Bách của em buồn hỏ, hãy nhắn tin liền cho em để em gặm sạch nỗi buồn cho Bách nhé." },
+      { mood: 'blue', text: "Anh yêu ơi, có em ở đây rồi, buồn một chút thôi nhó. Lại đây em ôm một cái rồi cùng nhau vượt qua nhaa." },
+
+      // Khi cần động lực
+      { mood: 'yellow', text: "Yêu của em tài giỏi và kiên cường lắm! Em luôn tin tưởng vào con đường yêu đã chọn." },
+      { mood: 'yellow', text: "Từng bước nhỏ cũng là đang tiến về phía trước. Cố gắng thêm chút nữa nhé, yêu của em đang làm rất tốt ròi!" },
+      { mood: 'yellow', text: "Phía trước là tương lai rực rỡ của chúng mình, hãy cố gắng nhé yêu của em ơi!" },
+      { mood: 'yellow', text: "Yêu cố lên nhé, em tin anh làm được mà. Nghỉ một chút nhưng không được bỏ cuộc nhaa. Em yêu anh!" },
+      { mood: 'yellow', text: "Yêu không cần hoàn hảo đâu, chỉ cần là chính yêu thôi, em mãi mãi tin yêu của em." },
+
+      // Khi thấy cô đơn
+      { mood: 'purple', text: "Đừng bao giờ cảm thấy lẻ loi, vì bất cứ lúc nào anh cần, em sẽ luôn sẵn sàng chạy tới bên anh." },
+      { mood: 'purple', text: "Thế giới này rộng lớn là để em tìm thấy anh. Anh không bao giờ đơn độc một mình đâu." },
+      { mood: 'purple', text: "Gửi tặng anh một cái ôm thật chặt từ xa, ấm áp như thể em đang đứng ngay trước mặt anh vậy!" },
+      { mood: 'purple', text: "Yêu ơi, nếu anh thấy cô đơn thì nhớ rằng luôn còn có em nhé. Em luôn ở cạnh anh, lớp diuuu!" },
+      { mood: 'purple', text: "Yêu đừng buồn nha, dù lúc này em không bên cạnh yêu được, trái tim em luôn cạnh yêu. Nhớ em một chút ròi ngủ thật ngoan nhee!" },
+
+      // Khi cần một chút yêu thương
+      { mood: 'red', text: "Em yêu anh nhiều hơn tất cả những vì sao trên bầu trời đêm nay cộng lại!" },
+      { mood: 'red', text: "Cảm ơn anh vì đã bước vào cuộc đời em và biến mỗi ngày bình thường thành ngọt ngào." },
+      { mood: 'red', text: "Anh là điều tuyệt vời và dịu dàng nhất mà vũ trụ này mang tặng cho em." },
+      { mood: 'red', text: "Anh mãi là Bách khoa của em. Em yêu anh nhiều lắm." },
+      { mood: 'red', text: "Anh là người em muốn yêu thương thật lâu, thật lâu nữa. Vậy nên nhớ ăn uống và chăm sóc bản thân nhé, anh quan trọng với em lắm đó." },
+      
+      // Khi muốn được an ủi
+      { mood: 'white', text: "Không sao đâu yêu, vấp ngã hay mỏi mệt là chuyện bình thường. Có em dang rộng vòng tay đón yêu nè." },
+      { mood: 'white', text: "Yêu đã cố gắng nhiều rồi. Hôm nay cứ thả lỏng và cho phép mình được được em yêu chiều hơn một chút nhé." },
+      { mood: 'white', text: "Mọi áp lực ngoài kia cứ để lại ngoài cửa, về bên em là chỉ có bình yên thôi!" },
+      { mood: 'white', text: "Yêu mệt rùi thì lại đây em ôm nhé. Em ở đây, thương yêu nhiều!" },
+      { mood: 'white', text: "Yêu ơi, em yêu anh nhất luôn ý. Siêu siêu yêu anh nên là em sẽ không bao giờ buông tay anh đâu. Vậy nên buồn chút thôi rồi tìm đến trạm sạc này xíu nhé." },
+
+      // Khi mất ngủ
+      { mood: 'lightblue', text: "Gác lại hết những bộn bề suy nghĩ nào... Giờ là lúc để cơ thể và tâm hồn yêu của em được nghỉ ngơi." },
+      { mood: 'lightblue', text: "Em sẽ hóa thành một giấc mơ thật đẹp, bay vào chúc anh yêu ngủ thật ngon đêm nay nhé!" },
+      { mood: 'lightblue', text: "Thả lỏng đôi vai, hít thở chậm lại... Em đang nắm tay anh ru anh ngủ đây này. Ngủ ngon nhé yêu của em!" },
+      { mood: 'lightblue', text: "Yêu ơi, không ngủ được thì nhắm mắt nằm ngoan ngoãn, để em gửi cho yêu một cái ôm rồi ngủ thật ngon nè!" },
+      { mood: 'lightblue', text: "Yêu ơi, ngủ ngoan nhó, em yêu anh!" }
+    ];
+
+    /* ==========================================================
+       3. THANH LỌC TÂM TRẠNG & KHỞI TẠO LỌ THUỐC
+    ========================================================== */
+    let currentFilter = 'all';
+    const glassJar = document.getElementById('glassJar');
+    const jarStage = document.getElementById('jarStage');
+    const moodFilterBar = document.getElementById('moodFilterBar');
+
+    function initMoodFilter() {
+      Object.keys(MOOD_CONFIG).forEach(key => {
+        const item = MOOD_CONFIG[key];
+        const btn = document.createElement('button');
+        btn.className = 'mood-chip';
+        btn.dataset.mood = item.id;
+        btn.innerHTML = `
+          <span class="mood-dot" style="background:${item.topColor}"></span>
+          <span>${item.icon} ${item.filterTag}</span>
+        `;
+        btn.onclick = () => filterByMood(item.id, btn);
+        moodFilterBar.appendChild(btn);
+      });
+    }
+
+    function filterByMood(moodId, element) {
+      currentFilter = moodId;
+      document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active'));
+      if (element) {
+        element.classList.add('active');
+      } else {
+        const target = document.querySelector(`.mood-chip[data-mood="${moodId}"]`);
+        if (target) target.classList.add('active');
+      }
+      populateJar();
+      shakeJar();
+    }
+
+    document.querySelector('.mood-chip[data-mood="all"]').onclick = function() {
+      filterByMood('all', this);
+    };
+
+    function populateJar() {
+      glassJar.innerHTML = `
+        <div class="glass-reflection"></div>
+        <div class="glass-reflection-small"></div>
+        <div class="jar-label">
+          <div class="jar-label-title">Liều Thuốc Trái Tim</div>
+          <div class="jar-label-sub">${currentFilter === 'all' ? 'Uống khi cần em' : MOOD_CONFIG[currentFilter]?.name || 'Uống khi cần em'}</div>
+        </div>
+      `;
+
+      let filtered = currentFilter === 'all' 
+        ? userMessages 
+        : userMessages.filter(m => m.mood === currentFilter);
+
+      if (filtered.length === 0) filtered = userMessages;
+
+      const count = Math.max(26, Math.min(34, filtered.length * 2));
+
+      for (let i = 0; i < count; i++) {
+        const msgObj = filtered[i % filtered.length];
+        const config = MOOD_CONFIG[msgObj.mood] || MOOD_CONFIG.pink;
+
+        const capsule = document.createElement('div');
+        capsule.className = 'capsule';
+        
+        const deg = Math.floor(Math.random() * 90) - 45;
+        capsule.style.transform = `rotate(${deg}deg)`;
+        capsule.style.animationDelay = `${(Math.random() * 2).toFixed(2)}s`;
+
+        capsule.innerHTML = `
+          <div class="cap-top" style="background: ${config.topColor};"></div>
+          <div class="cap-bottom" style="background: ${config.bottomColor};"></div>
+        `;
+
+        capsule.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openCapsuleModal(msgObj, config);
+        });
+
+        glassJar.appendChild(capsule);
+      }
+    }
+
+    document.getElementById('jarClickArea').addEventListener('click', () => {
+      shakeJar();
+    });
+
+    function shakeJar() {
+      jarStage.classList.remove('shake-gentle');
+      void jarStage.offsetWidth;
+      jarStage.classList.add('shake-gentle');
+      createSparkleBurst();
+    }
+
+    /* ==========================================================
+       4. HIỆU ỨNG VIÊN BAY RA KHỎI LỌ & BỨC THƯ MỞ RA
+    ========================================================== */
+    const letterModal = document.getElementById('letterModal');
+    const flyingCapsule = document.getElementById('flyingCapsule');
+    const splitTop = document.getElementById('splitTop');
+    const splitBottom = document.getElementById('splitBottom');
+    const letterPaper = document.getElementById('letterPaper');
+    const modalMessageText = document.getElementById('modalMessageText');
+    const modalMoodDot = document.getElementById('modalMoodDot');
+    const modalMoodText = document.getElementById('modalMoodText');
+    const modalDateStamp = document.getElementById('modalDateStamp');
+
+    function openCapsuleModal(msgObj, config) {
+      splitTop.style.background = config.topColor;
+      splitBottom.style.background = config.bottomColor;
+      flyingCapsule.classList.remove('opened');
+      letterPaper.classList.remove('unfolded');
+
+      modalMoodDot.style.background = config.topColor;
+      modalMoodText.innerHTML = `${config.icon} ${config.name}`;
+      modalMessageText.innerText = `"${msgObj.text}"`;
+
+      const today = new Date();
+      modalDateStamp.innerText = `${today.getDate()} tháng ${today.getMonth() + 1}`;
+
+      letterModal.classList.add('active');
+
+      setTimeout(() => {
+        flyingCapsule.classList.add('opened');
+        createHeartBurst();
+      }, 300);
+
+      setTimeout(() => {
+        letterPaper.classList.add('unfolded');
+      }, 550);
+    }
+
+    function closeLetterModal() {
+      letterPaper.classList.remove('unfolded');
+      flyingCapsule.classList.remove('opened');
+      setTimeout(() => {
+        letterModal.classList.remove('active');
+      }, 300);
+    }
+
+    function takeAnotherPill() {
+      closeLetterModal();
+      setTimeout(() => {
+        takeRandomCapsule();
+      }, 380);
+    }
+
+    function takeRandomCapsule() {
+      shakeJar();
+      let pool = currentFilter === 'all' 
+        ? userMessages 
+        : userMessages.filter(m => m.mood === currentFilter);
+
+      if (pool.length === 0) pool = userMessages;
+      const randomMsg = pool[Math.floor(Math.random() * pool.length)];
+      const config = MOOD_CONFIG[randomMsg.mood] || MOOD_CONFIG.pink;
+
+      setTimeout(() => {
+        openCapsuleModal(randomMsg, config);
+      }, 350);
+    }
+
+    letterModal.addEventListener('click', (e) => {
+      if (e.target === letterModal) closeLetterModal();
+    });
+
+    /* ==========================================================
+       5. CÁNH HOA & BỤI SAO BAY (CANVAS NỀN)
+    ========================================================== */
+    const canvas = document.getElementById('ambientCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * -height * 0.5;
+        this.size = Math.random() * 7 + 4;
+        this.speedY = Math.random() * 0.8 + 0.4;
+        this.speedX = Math.sin(Math.random() * 5) * 0.5;
+        this.rotation = Math.random() * 360;
+        this.rotSpeed = (Math.random() - 0.5) * 1.5;
+        this.opacity = Math.random() * 0.5 + 0.3;
+        this.type = Math.random() > 0.4 ? 'petal' : 'glow';
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += Math.sin(this.y * 0.015) * 0.6;
+        this.rotation += this.rotSpeed;
+        if (this.y > height + 20) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.rotation * Math.PI) / 180);
+        ctx.globalAlpha = this.opacity;
+
+        if (this.type === 'petal') {
+          ctx.fillStyle = '#ffb3c1';
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(-this.size, -this.size, 0, -this.size * 1.6);
+          ctx.quadraticCurveTo(this.size, -this.size, 0, 0);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = '#ffe5ec';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#ff758f';
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size * 0.35, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < 28; i++) {
+      const p = new Particle();
+      p.y = Math.random() * height;
+      particles.push(p);
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    function createHeartBurst() {
+      for (let i = 0; i < 9; i++) {
+        const heart = document.createElement('div');
+        heart.innerHTML = ['❤️', '✨', '🌸', '💖'][Math.floor(Math.random() * 4)];
+        heart.style.position = 'fixed';
+        heart.style.left = '50%';
+        heart.style.top = '40%';
+        heart.style.fontSize = `${Math.random() * 16 + 14}px`;
+        heart.style.pointerEvents = 'none';
+        heart.style.zIndex = '150';
+        heart.style.transition = 'all 1.1s cubic-bezier(0.2, 0.9, 0.3, 1)';
+        document.body.appendChild(heart);
+
+        const angle = (Math.PI * 2 / 9) * i;
+        const dist = Math.random() * 80 + 60;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 20;
+
+        setTimeout(() => {
+          heart.style.transform = `translate(${tx}px, ${ty}px) scale(0)`;
+          heart.style.opacity = '0';
+        }, 30);
+
+        setTimeout(() => heart.remove(), 1200);
+      }
+    }
+
+    function createSparkleBurst() {
+      const jarBox = glassJar.getBoundingClientRect();
+      for (let i = 0; i < 6; i++) {
+        const star = document.createElement('div');
+        star.innerHTML = '✨';
+        star.style.position = 'fixed';
+        star.style.left = `${jarBox.left + Math.random() * jarBox.width}px`;
+        star.style.top = `${jarBox.top + Math.random() * jarBox.height * 0.7}px`;
+        star.style.pointerEvents = 'none';
+        star.style.zIndex = '50';
+        star.style.fontSize = '18px';
+        star.style.transition = 'transform 0.8s ease-out, opacity 0.8s ease-out';
+        document.body.appendChild(star);
+
+        setTimeout(() => {
+          star.style.transform = `translateY(-30px) scale(1.4)`;
+          star.style.opacity = '0';
+        }, 20);
+
+        setTimeout(() => star.remove(), 900);
+      }
+    }
+
+    initMoodFilter();
+    populateJar();
+  </script>
+</body>
+</html>
